@@ -1,6 +1,7 @@
 ﻿using App.Core.Entities.Identity;
 using App.DAL.Presistence;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -24,12 +25,17 @@ namespace App.DAL
 
         private static void AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
-            // SQL database connection here!!!
+            // SQL Database 
+            var connectionString = Environment.GetEnvironmentVariable("CloudConnection")
+                                         ?? configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21)),
+                mySqlOptions => mySqlOptions.EnableStringComparisonTranslations()));
         }
 
         private static void AddIdentity(this IServiceCollection services)
         {
-            services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<AppDbContext>();
 
             services.Configure<IdentityOptions>(options =>

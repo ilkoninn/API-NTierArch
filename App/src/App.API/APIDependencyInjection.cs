@@ -75,6 +75,7 @@ namespace App.API
         public static void AddMiddlewares(this IApplicationBuilder builder)
         {
             builder.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+            builder.UseMiddleware<XSSProtectionMiddleware>();
         }
     }
 }

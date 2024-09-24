@@ -25,7 +25,10 @@ namespace App.Shared.Implementations
 
         public string GetClaim(string key)
         {
-            return _httpContextAccessor.HttpContext?.User?.FindFirst(key)?.Value;
+            var result = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value
+                ?? _httpContextAccessor.HttpContext?.User?.Claims?.FirstOrDefault()?.Value;
+
+            return result;
         }
     }
 }

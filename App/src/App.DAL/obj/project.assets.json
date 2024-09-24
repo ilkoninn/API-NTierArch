@@ -5448,11 +5448,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.DAL\\App.DAL.csproj",
+      "projectUniqueName": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.DAL\\App.DAL.csproj",
       "projectName": "App.DAL",
-      "projectPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.DAL\\App.DAL.csproj",
+      "projectPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.DAL\\App.DAL.csproj",
       "packagesPath": "C:\\Users\\ilkin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.DAL\\obj\\",
+      "outputPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.DAL\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ilkin\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -5470,8 +5470,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.Shared\\App.Shared.csproj": {
-              "projectPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.Shared\\App.Shared.csproj"
+            "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.Shared\\App.Shared.csproj": {
+              "projectPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.Shared\\App.Shared.csproj"
             }
           }
         }

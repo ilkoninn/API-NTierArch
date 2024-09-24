@@ -1058,11 +1058,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.Core\\App.Core.csproj",
+      "projectUniqueName": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.Core\\App.Core.csproj",
       "projectName": "App.Core",
-      "projectPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.Core\\App.Core.csproj",
+      "projectPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.Core\\App.Core.csproj",
       "packagesPath": "C:\\Users\\ilkin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.Core\\obj\\",
+      "outputPath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.Core\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ilkin\\AppData\\Roaming\\NuGet\\NuGet.Config",

@@ -13,7 +13,7 @@ namespace App.Business.Helpers
 {
     public static class JwtGenerator
     {
-        public static string GenerateToken(AppUser user, IConfiguration configuration)
+        public static string GenerateToken(User user, IConfiguration configuration)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(configuration["JwtConfiguration:SecretKey"]);

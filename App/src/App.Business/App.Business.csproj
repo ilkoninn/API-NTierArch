@@ -7,9 +7,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="MappingProfiles\Commons\" />
-		<Folder Include="Services\Implementations\" />
-		<Folder Include="Services\Interfaces\" />
+	  <Compile Remove="Services\Implementations\**" />
+	  <Compile Remove="Services\Interfaces\**" />
+	  <EmbeddedResource Remove="Services\Implementations\**" />
+	  <EmbeddedResource Remove="Services\Interfaces\**" />
+	  <None Remove="Services\Implementations\**" />
+	  <None Remove="Services\Interfaces\**" />
 	</ItemGroup>
 
 	<ItemGroup>

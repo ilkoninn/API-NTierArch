@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace App.Core.Enums
 {
-    public enum EUserRoles
+    public enum EUserRole
     {
-        SuperAdmin,
-        Admin
+        Admin,
+        Moderator
     }
 }

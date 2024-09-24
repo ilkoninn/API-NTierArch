@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "XMw5+NAwLnI=",
+  "dgSpecHash": "VcYggVxSmzg=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.DAL\\App.DAL.csproj",
+  "projectFilePath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.DAL\\App.DAL.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ilkin\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\ilkin\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "MqNJKhaYx6o=",
+  "dgSpecHash": "syvLeyflh8w=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\App\\App.Business\\App.Business.csproj",
+  "projectFilePath": "C:\\Users\\ilkin\\OneDrive\\Desktop\\API-NTierArch\\App\\src\\App.Business\\App.Business.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ilkin\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\ilkin\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",

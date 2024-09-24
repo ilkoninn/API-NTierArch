@@ -18,7 +18,7 @@ namespace App.DAL.Presistence
 
             if (context.Database.IsSqlServer()) await context.Database.MigrateAsync();
 
-            var userManager = services.GetRequiredService<UserManager<AppUser>>();
+            var userManager = services.GetRequiredService<UserManager<User>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
             await AppDbContextSeed.SeedDatabaseAsync(context, userManager, roleManager);

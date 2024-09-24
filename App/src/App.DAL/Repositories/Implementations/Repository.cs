@@ -1,15 +1,10 @@
-﻿using App.Core.Entities.Commons;
+﻿using System.Linq.Expressions;
+using App.Core.Entities.Commons;
 using App.DAL.Presistence;
 using App.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace App.DAL.Repositories.Implementations
+namespace App.DAL.Repositories.Abstractions
 {
     public class Repository<TEntity> : IRepository<TEntity>, IDisposable where TEntity : BaseEntity, IAuditedEntity
     {
@@ -22,14 +17,15 @@ namespace App.DAL.Repositories.Implementations
             DbSet = context.Set<TEntity>();
         }
 
-        public async Task<IQueryable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includes)
+        public async Task<ICollection<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includes)
         {
-            return AddIncludes(DbSet.Where(predicate), includes);
+            return await AddIncludes(DbSet.Where(predicate), includes);
         }
 
-        public async Task<TEntity?> GetByIdAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[]? includes)
+        public async Task<TEntity?> GetByIdAsync(Expression<Func<TEntity, bool>> predicate,
+            params Expression<Func<TEntity, object>>[]? includes)
         {
-            return await AddIncludes(DbSet, includes).FirstOrDefaultAsync(predicate);
+            return (await AddIncludes(DbSet, includes)).FirstOrDefault(predicate.Compile());
         }
 
         public async Task<TEntity> AddAsync(TEntity entity)
@@ -76,9 +72,9 @@ namespace App.DAL.Repositories.Implementations
             return entity;
         }
 
-        public IQueryable<TEntity> AddIncludes(IQueryable<TEntity> query, params Expression<Func<TEntity, object>>[] includes)
+        public async Task<ICollection<TEntity>> AddIncludes(IQueryable<TEntity> query, params Expression<Func<TEntity, object>>[] includes)
         {
-            return includes?.Aggregate(query, (current, include) => current.Include(include)) ?? query;
+            return await includes?.Aggregate(query, (current, include) => current.Include(include)).ToListAsync() ?? await query.ToListAsync();
         }
 
         public void Dispose()
@@ -100,3 +96,27 @@ namespace App.DAL.Repositories.Implementations
         }
     }
 }
+
+
+// Garbage Codes For Future
+
+//public async Task<TEntity?> GetByIdWithIncludesAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includes)
+//{
+//    var entity = await DbSet.FirstOrDefaultAsync(predicate);
+//    if (entity == null)
+//    {
+//        return null;
+//    }
+//    foreach (var include in includes)
+//    {
+//        var memberExpression = include.Body as MemberExpression ?? ((UnaryExpression)include.Body).Operand as MemberExpression;
+//        if (memberExpression == null)
+//        {
+//            continue;
+//        }
+//        var navigationPropertyName = memberExpression.Member.Name;
+//        var navigation = Context.Entry(entity).Navigation(navigationPropertyName);
+//        await navigation.LoadAsync();
+//    }
+//    return entity;
+//}
