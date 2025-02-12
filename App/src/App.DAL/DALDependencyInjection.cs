@@ -28,9 +28,15 @@ namespace App.DAL
             // SQL Database 
             var connectionString = Environment.GetEnvironmentVariable("CloudConnection")
                                          ?? configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21)),
-                mySqlOptions => mySqlOptions.EnableStringComparisonTranslations()));
+            
+            //services.AddDbContext<AppDbContext>(options =>
+            //    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21)),
+            //    mySqlOptions => mySqlOptions.EnableStringComparisonTranslations()));
+            
+            services.AddDbContext<AppDbContext>(opt =>
+            {
+                opt.UseSqlServer(connectionString);
+            });
         }
 
         private static void AddIdentity(this IServiceCollection services)
