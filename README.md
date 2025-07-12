@@ -14,7 +14,7 @@ src/ <br/>
 ├── App.Business → Business Logic Layer (Services, Interfaces, DTOs) <br/>
 ├── App.Core → Domain Layer (Entities, Enums, Contracts) <br/>
 ├── App.DAL → Data Access Layer (EF Core, DbContext, Repositories) <br/>
-├── App.Shared → Shared Layer (Response Models, Base Classes) <br/>
+├── App.Shared → Shared Layer (External services (Email, Cloud, etc.)) <br/>
 └── App.sln → Solution File <br/>
 
 
