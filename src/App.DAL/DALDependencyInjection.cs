@@ -1,7 +1,5 @@
 ﻿using App.Core.Entities.Identity;
 using App.DAL.Presistence;
-using App.DAL.Repositories.Implementations;
-using App.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -68,7 +66,7 @@ namespace App.DAL
 
         private static void AddRepositories(this IServiceCollection services)
         {
-            services.AddScoped<ISettingRepository, SettingRepository>();
+            // Repositories
         }
     }
 }

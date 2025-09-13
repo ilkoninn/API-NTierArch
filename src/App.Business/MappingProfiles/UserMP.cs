@@ -1,4 +1,5 @@
-﻿using App.Business.DTOs.UserDTOs;
+﻿using App.Business.MappingProfiles.Commons;
+using App.Core.DTOs.UserDTOs;
 using App.Core.Entities.Identity;
 using AutoMapper;
 using System;
@@ -14,10 +15,18 @@ namespace App.Business.MappingProfiles
         public UserMP()
         {
             CreateMap<User, UserDTO>()
-       .ForMember(dest => dest.IsBanned, opt =>
-           opt.MapFrom(src => src.LockoutEnd != null && src.LockoutEnd > DateTimeOffset.UtcNow));
-            CreateMap<CreateUserDTO, User>();
-            CreateMap<UpdateUserDTO, User>();
+                .ForMember(dest => dest.IsBanned, opt =>
+                opt.MapFrom(src => src.LockoutEnd != null && src.LockoutEnd > DateTimeOffset.UtcNow));
+
+            CreateMap<CreateUserDTO, User>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+                .AfterMap<CustomMappingAction<CreateUserDTO, User>>();
+            CreateMap<UpdateUserDTO, User>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+                .AfterMap<CustomMappingAction<UpdateUserDTO, User>>();
+            CreateMap<UpdateMainUserDTO, User>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+                .AfterMap<CustomMappingAction<UpdateMainUserDTO, User>>();
         }
     }
 }

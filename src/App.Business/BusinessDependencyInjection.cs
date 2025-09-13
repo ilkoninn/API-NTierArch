@@ -1,10 +1,9 @@
-﻿using App.Business.DTOs.Commons;
+﻿using App.Core.DTOs.Commons;
 using App.Business.Helpers;
 using App.Business.Services.ExternalServices.Abstractions;
 using App.Business.Services.ExternalServices.Interfaces;
 using App.Business.Services.InternalServices.Abstractions;
 using App.Business.Services.InternalServices.Interfaces;
-using App.Business.Validators.Commons;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentValidation;
 
 namespace App.Business
 {
@@ -29,7 +29,8 @@ namespace App.Business
                 options.Conventions.Add(new PluralizedRouteConvention());
                 options.ModelValidatorProviders.Clear();
             })
-           .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<BaseEntityValidator<BaseEntityDTO>>())
+           .AddFluentValidation(fv => fv
+           .RegisterValidatorsFromAssemblyContaining<AbstractValidator<BaseEntityDTO>>())
            .AddJsonOptions(options =>
            {
                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -46,7 +47,6 @@ namespace App.Business
 
             // Internal Services
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<ISettingService, SettingService>();
         }
 
         private static void RegisterAutoMapper(this IServiceCollection services)

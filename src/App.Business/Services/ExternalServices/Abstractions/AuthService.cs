@@ -1,7 +1,8 @@
-﻿using App.Business.DTOs.AuthDTOs;
-using App.Business.Helpers;
+﻿using App.Business.Helpers;
 using App.Business.Services.ExternalServices.Interfaces;
+using App.Core.DTOs.AuthDTOs;
 using App.Core.Entities.Identity;
+using App.Core.Exceptions.Commons;
 using App.Shared.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -19,19 +20,17 @@ namespace App.Business.Services.ExternalServices.Abstractions
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly IClaimService _claimService;
 
         public AuthService(
-            UserManager<User> userManager, IClaimService claimService, 
+            UserManager<User> userManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
-            _claimService = claimService;
             _configuration = configuration;
         }
 
 
-        public async Task LoginAsync(LoginDTO dto)
+        public async Task<LoginResponseDTO> LoginAsync(LoginDTO dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.UsernameOrEmail);
 
@@ -46,12 +45,20 @@ namespace App.Business.Services.ExternalServices.Abstractions
 
             var token = JwtGenerator.GenerateToken(user, role, _configuration);
 
-            _claimService.CreateAccessToken(token);
+            return new LoginResponseDTO
+            {
+                Token = token
+            };
         }
 
-        public void LogoutAsync()
+        public async Task<User> CheckUserNotFoundAsync(string id)
         {
-            _claimService.RemoveAccessToken();
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user is null)
+                throw new EntityNotFoundException($"Entity of type {typeof(User).Name.ToLower()} not found.");
+
+            return user;
         }
     }
 }

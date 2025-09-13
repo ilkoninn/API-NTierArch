@@ -20,17 +20,29 @@ namespace App.Business.Helpers
         {
             string[] allowedTypes = new[]
             {
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "application/vnd.ms-powerpoint",
-                "application/vnd.openxmlformats-officedocument.presentationml.presentation",                "image/jpeg",
-                "image/png",
-                "image/gif",
-                "image/webp"
+                // Document formats
+                "application/pdf",                                                      // .pdf
+                "application/msword",                                                  // .doc
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+                "application/vnd.ms-powerpoint",                                       // .ppt
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+
+                // Image formats
+                "image/jpeg",     // .jpg, .jpeg
+                "image/png",      // .png
+                "image/gif",      // .gif
+                "image/webp",     // .webp
+                "image/bmp",      // .bmp
+                "image/tiff",     // .tif, .tiff
+                "image/svg+xml",  // .svg
+                "image/x-icon",   // .ico
+                "image/vnd.microsoft.icon", // .ico (alternative)
+                "image/heif",     // .heif
+                "image/heic"      // .heic
             };
 
             return allowedTypes.Contains(contentType);
         }
+
     }
 }

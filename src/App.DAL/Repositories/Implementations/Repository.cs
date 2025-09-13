@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace App.DAL.Repositories.Abstractions
 {
-    public class Repository<TEntity> : IRepository<TEntity>, IDisposable where TEntity : BaseEntity, IAuditedEntity
+    public class Repository<TEntity> : IRepository<TEntity>, IDisposable where TEntity : AuditableEntity
     {
         protected readonly AppDbContext Context;
         protected readonly DbSet<TEntity> DbSet;
@@ -20,20 +20,20 @@ namespace App.DAL.Repositories.Abstractions
         }
 
         // Read Repository Methods
-        public async Task<ICollection<TEntity>> GetAllAsync(
+        public IQueryable<TEntity> GetAll(
             Expression<Func<TEntity, bool>> predicate, 
             bool tracking = true,
             params Expression<Func<TEntity, object>>[] includes)
         {
-            return await AddIncludes(DbSet.Where(predicate), tracking, includes);
+            return AddIncludes(DbSet.Where(predicate), tracking, includes);
         }
 
-        public async Task<TEntity?> GetByIdAsync(
+        public TEntity GetById(
             Expression<Func<TEntity, bool>> predicate,
             bool tracking = true,
             params Expression<Func<TEntity, object>>[]? includes)
         {
-            var entity = (await AddIncludes(DbSet, tracking, includes)).FirstOrDefault(predicate.Compile());
+            var entity = AddIncludes(DbSet, tracking, includes).FirstOrDefault(predicate.Compile());
 
             if (entity == null) throw new
                     EntityNotFoundException($"Entity of type {typeof(TEntity).Name.ToLower()} not found.");
@@ -101,16 +101,15 @@ namespace App.DAL.Repositories.Abstractions
 
 
         // Additional Helper Methods
-        private async Task<ICollection<TEntity>> AddIncludes(
+        private IQueryable<TEntity> AddIncludes(
             IQueryable<TEntity> query,
             bool tracking = true,
-            params Expression<Func<TEntity, object>>[] includes)
+            params Expression<Func<TEntity, object>>[]? includes)
         {
             if (!tracking)
                 query = query.AsNoTracking();
 
-            return await includes?.Aggregate(query, (current, include) => current.Include(include))
-                .ToListAsync() ?? await query.ToListAsync();
+            return includes?.Aggregate(query, (current, include) => current.Include(include)) ?? query;
         }
 
         public void Dispose()

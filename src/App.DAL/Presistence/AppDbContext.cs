@@ -17,14 +17,15 @@ namespace App.DAL.Presistence
 {
     public class AppDbContext : IdentityDbContext<User>
     {
-        private readonly IClaimService _claimService;
+        private readonly IClaimService? _claimService;
 
-        public AppDbContext(DbContextOptions<AppDbContext> options, IClaimService claimService) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options, 
+            IClaimService? claimService = null) : base(options)
         {
             _claimService = claimService;
         }
 
-        public DbSet<Setting> Settings { get; set; }
+        // Models Here !!
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,21 +35,28 @@ namespace App.DAL.Presistence
 
         public new async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
-            foreach (var entry in ChangeTracker.Entries<IAuditedEntity>())
+            var userId = _claimService?.GetUserId() ?? "ByServer";
+
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
             {
                 switch (entry.State)
                 {
                     case EntityState.Added:
-                        entry.Entity.CreatedBy = _claimService.GetUserId() ?? "ByServer";
+                        entry.Entity.CreatedById = userId;
                         entry.Entity.CreatedOn = DateTime.UtcNow;
 
-                        entry.Entity.UpdatedBy = _claimService.GetUserId() ?? "ByServer";
-                        entry.Entity.UpdatedOn = DateTime.UtcNow;
+                        entry.Entity.LastModifiedById = userId;
+                        entry.Entity.LastModifiedOn = DateTime.UtcNow;
                         break;
 
                     case EntityState.Modified:
-                        entry.Entity.UpdatedBy = _claimService.GetUserId() ?? "ByServer";
-                        entry.Entity.UpdatedOn = DateTime.UtcNow;
+                        entry.Entity.LastModifiedById = userId;
+                        entry.Entity.LastModifiedOn = DateTime.UtcNow;
+                        break;
+
+                    case EntityState.Deleted:
+                        entry.Entity.DeletedById = userId;
+                        entry.Entity.DeletedOn = DateTime.UtcNow;
                         break;
                 }
             }

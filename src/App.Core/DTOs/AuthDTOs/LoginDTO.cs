@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace App.Business.DTOs.AuthDTOs
+namespace App.Core.DTOs.AuthDTOs
 {
     public class LoginDTO
     {
@@ -12,4 +12,8 @@ namespace App.Business.DTOs.AuthDTOs
         public string Password { get; set; }
     }
 
+    public class LoginResponseDTO
+    {
+        public string Token { get; set; }
+    }
 }

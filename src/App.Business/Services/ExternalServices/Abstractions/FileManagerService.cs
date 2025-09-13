@@ -28,14 +28,36 @@ namespace App.Business.Services.ExternalServices.Abstractions
 
         public async Task<string> UploadFileAsync(IFormFile file)
         {
-            string fileName = await _cloudService.UploadToCloudAsync(file);
+            string fileName = await UploadLocalAsync(file);
+            string fileUrl = $"https://apipms.devitgroup.az/uploads/{fileName}";
 
-            return fileName;
+            return fileUrl;
         }
 
         public async Task RemoveFileAsync(string fileUrl)
         {
-            await _cloudService.DeleteFileFromCloudAsync(fileUrl);
+            await DeleteLocalAsync(fileUrl);
+        }
+
+        private async Task DeleteLocalAsync(string fileUrl)
+        {
+            var uploadsPath = Path.Combine(_environment.WebRootPath ?? "wwwroot", "uploads");
+
+            string encodedFileName = Path.GetFileName(new Uri(fileUrl).AbsolutePath);
+            string fileName = Uri.UnescapeDataString(encodedFileName); // decode %20, etc.
+
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            else
+            {
+                throw new FileNotFoundException("File not found.", fileName);
+            }
+
+            await Task.CompletedTask;
         }
 
         private async Task<string> UploadLocalAsync(IFormFile file)

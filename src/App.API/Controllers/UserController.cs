@@ -1,16 +1,13 @@
-﻿using App.Business.DTOs.UserDTOs;
-using App.Business.Services.InternalServices.Abstractions;
-using App.Business.Services.InternalServices.Interfaces;
+﻿using App.Business.Services.InternalServices.Interfaces;
 using App.Business.Validators.UserValidators;
+using App.Core.DTOs.UserDTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -21,14 +18,16 @@ namespace App.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllAsync()
+        [Authorize(Roles = "Admin, CEO, Manager, COFounder")]
+        public async Task<IActionResult> GetAllAsync()
         {
-            var result = _userService.GetAllAsync();
+            var result = await _userService.GetAllAsync();
 
             return Ok(result);
         }
 
         [HttpPatch("ban/{id}")]
+        [Authorize(Roles = "Admin, CEO, Manager")]
         public async Task<IActionResult> LockedOutAsync(string id)
         {
             await _userService.LockedOutAsync(id);
@@ -36,21 +35,24 @@ namespace App.API.Controllers
         }
 
         [HttpPatch("recover/{id}")]
+        [Authorize(Roles = "Admin, CEO, Manager")]
         public async Task<IActionResult> RecoverAsync(string id)
         {
             await _userService.RecoverAsync(id);
             return Ok();
         }
 
-        [HttpDelete("remove/{id}")]
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin, CEO, Manager")]
         public async Task<IActionResult> RemoveAsync(string id)
         {
             await _userService.RemoveAsync(id);
             return Ok();
         }
 
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateUserDTO dto)
+        [HttpPost]
+        [Authorize(Roles = "Admin, CEO, Manager")]
+        public async Task<IActionResult> CreateAsync([FromForm] CreateUserDTO dto)
         {
             var validationResult = await new CreateUserDTOValidator().ValidateAsync(dto);
 
@@ -63,8 +65,9 @@ namespace App.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateAsync([FromBody] UpdateUserDTO dto)
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin, CEO, Manager")]
+        public async Task<IActionResult> UpdateAsync([FromRoute] string id, [FromForm] UpdateUserDTO dto)
         {
             var validationResult = await new UpdateUserDTOValidator().ValidateAsync(dto);
 
@@ -73,9 +76,22 @@ namespace App.API.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
-            var result = await _userService.UpdateAsync(dto);
+            var result = await _userService.UpdateAsync(id, dto);
             return Ok(result);
         }
 
+        [HttpPut("main/{id}")]
+        public async Task<IActionResult> UpdateAsync([FromRoute] string id, [FromForm] UpdateMainUserDTO dto)
+        {
+            var validationResult = await new UpdateMainUserDTOValidator().ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
+            var result = await _userService.UpdateAsync(id, dto);
+            return Ok(result);
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace App.Shared.Services.Interfaces
 {
     public interface IEmailService
     {
+        Task SendReminderNotificationMessageAsync(string to, string projectTitle, DateTimeOffset reminderDate);
         Task SendNewContactNotificationAsync(string webUser);
     }
 }

@@ -51,6 +51,8 @@ namespace App.Shared.Services.Implementations
             if (!FileChecker.BeAValidImage(file))
                 throw new Exception("Invalid file format. Only image, PDF, Word, or PowerPoint files are allowed (maximum size: 20MB).");
 
+            await EnsureCloudStorageAvailableAsync();
+
             using (var stream = file.OpenReadStream())
             {
                 var uploadParams = new RawUploadParams
@@ -63,6 +65,16 @@ namespace App.Shared.Services.Implementations
 
                 return uploadResult?.SecureUrl?.ToString();
             }
+        }
+
+        private async Task EnsureCloudStorageAvailableAsync()
+        {
+            var result = await _cloudinary.GetUsageAsync();
+
+            var usedPercent = result?.Storage?.UsedPercent ?? 0;
+
+            if (usedPercent >= 95)
+                throw new Exception($"Cloudinary storage usage is at {usedPercent:F1}%. Uploading is blocked.");
         }
     }
 }

@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace App.Core.Enums
+namespace App.Core.DTOs.AuthDTOs
 {
-    public enum EUserRole
+    public class JwtRequestDTO
     {
-        Admin,
-        Moderator,
-        User,
+        public string jwtTokenString { get; set; }
     }
 }

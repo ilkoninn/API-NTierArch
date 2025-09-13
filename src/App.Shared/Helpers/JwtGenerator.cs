@@ -23,7 +23,7 @@ namespace App.Business.Helpers
                     new Claim("id", user.Id.ToString()),
                     new Claim("role", role),
                 }),
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddDays(7),
                 Issuer = configuration["JwtConfiguration:Issuer"],
                 Audience = configuration["JwtConfiguration:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

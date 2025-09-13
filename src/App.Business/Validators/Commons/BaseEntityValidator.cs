@@ -1,4 +1,4 @@
-﻿using App.Business.DTOs.Commons;
+﻿using App.Core.DTOs.Commons;
 using FluentValidation;
 using System;
 using System.Collections.Generic;

@@ -5,11 +5,11 @@ namespace App.DAL.Repositories.Interfaces
     public interface IRepository<TEntity>
     {
         // Read Repository Methods
-        Task<TEntity> GetByIdAsync(
+        TEntity GetById(
             Expression<Func<TEntity, bool>> predicate,
             bool tracking = true,
             params Expression<Func<TEntity, object>>[]? includes);
-        Task<ICollection<TEntity>> GetAllAsync(
+        IQueryable<TEntity> GetAll(
             Expression<Func<TEntity, bool>> predicate,
             bool tracking = true,
             params Expression<Func<TEntity, object>>[] includes);

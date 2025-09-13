@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace App.Business.Validators.UserValidators
 {
-    public class CreateUserDTOValidator : AbstractValidator<CreateUserDTO>
+    public class UpdateMainUserDTOValidator : AbstractValidator<UpdateMainUserDTO>
     {
-        public CreateUserDTOValidator()
+        public UpdateMainUserDTOValidator()
         {
             RuleFor(x => x.FullName)
                 .NotEmpty()

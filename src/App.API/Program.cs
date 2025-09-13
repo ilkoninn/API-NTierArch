@@ -38,9 +38,12 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 
+app.UseCors("AllowReactApp");
+
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
-// Add Middlewares
+// Add Middlewares Here
 app.AddMiddlewares();
 
 app.UseAuthorization();

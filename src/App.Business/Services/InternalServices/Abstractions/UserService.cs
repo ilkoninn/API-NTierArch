@@ -1,9 +1,11 @@
-﻿using App.Business.DTOs.UserDTOs;
+﻿using App.Business.Services.ExternalServices.Interfaces;
 using App.Business.Services.InternalServices.Interfaces;
+using App.Core.DTOs.UserDTOs;
 using App.Core.Entities.Identity;
 using App.Core.Enums;
 using App.Core.Exceptions.Commons;
 using AutoMapper;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -15,11 +17,13 @@ namespace App.Business.Services.InternalServices.Abstractions
 {
     public class UserService : IUserService
     {
+        private readonly IFileManagerService _fileManagerService;
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
 
-        public UserService(UserManager<User> userManager, IMapper mapper)
+        public UserService(UserManager<User> userManager, IMapper mapper, IFileManagerService fileManagerService)
         {
+            _fileManagerService = fileManagerService;
             _userManager = userManager;
             _mapper = mapper;
         }
@@ -28,12 +32,27 @@ namespace App.Business.Services.InternalServices.Abstractions
         {
             var user = _mapper.Map<User>(dto);
 
-            user.Email = $"{dto.FullName.ToLower()}@devservice.az".Replace(" ", "_");
-            user.UserName = dto.FullName.ToLower().Replace(" ", "_");
+            user.UserName = dto.FullName.ToLower().Replace(" ", ".");
             user.EmailConfirmed = true;
 
-            EnsureIdentitySucceeded(await _userManager.CreateAsync(user, $"{dto.FullName.Replace(" ", "_")}dev123!@"));
-            EnsureIdentitySucceeded(await _userManager.AddToRoleAsync(user, EUserRole.Employee.ToString()));
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+            {
+                EnsureIdentitySucceeded(await _userManager.CreateAsync(user, dto.Password));
+            }
+            else
+            {
+                var defaultPassword = $"{dto.FullName.Replace(" ", ".")}dev123!@";
+                EnsureIdentitySucceeded(await _userManager.CreateAsync(user, defaultPassword));
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Role) && Enum.TryParse<EUserRole>(dto.Role, true, out var role))
+            {
+                EnsureIdentitySucceeded(await _userManager.AddToRoleAsync(user, role.ToString()));
+            }
+            else
+            {
+                EnsureIdentitySucceeded(await _userManager.AddToRoleAsync(user, EUserRole.User.ToString()));
+            }
 
             return _mapper.Map<UserDTO>(user);
         }
@@ -46,11 +65,28 @@ namespace App.Business.Services.InternalServices.Abstractions
             EnsureIdentitySucceeded(await _userManager.UpdateAsync(user));
         }
 
-        public IQueryable<UserDTO> GetAllAsync()
+        public async Task<IQueryable<UserDTO>> GetAllAsync()
         {
-            return _userManager.Users
-                .Where(x => x.UserName != "admin")
-                .Select(user => _mapper.Map<UserDTO>(user)).AsQueryable();
+            var users = _userManager.Users.Where(x => x.UserName != "admin").ToList();
+
+            var result = new List<UserDTO>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                result.Add(new UserDTO
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    PhoneNumber = user.PhoneNumber,
+                    ImageUrl = user.ImageUrl,
+                    Role = roles.FirstOrDefault() ?? string.Empty,
+                    IsBanned = !user.LockoutEnabled
+                });
+            }
+
+            return result.AsQueryable();
         }
 
         public async Task RecoverAsync(string id)
@@ -66,19 +102,88 @@ namespace App.Business.Services.InternalServices.Abstractions
             EnsureIdentitySucceeded(await _userManager.DeleteAsync(await CheckUserNotFoundAsync(id)));
         }
 
-        public async Task<UserDTO> UpdateAsync(UpdateUserDTO dto)
+        public async Task<UserDTO> UpdateAsync(string id, UpdateUserDTO dto)
         {
-            var oldUser = await CheckUserNotFoundAsync(dto.Id);
+            var oldUser = await CheckUserNotFoundAsync(id);
+
+            if (dto.Image is not null)
+            {
+                if (!string.IsNullOrWhiteSpace(oldUser.ImageUrl))
+                    await _fileManagerService.RemoveFileAsync(oldUser.ImageUrl);
+            }
+
             var updatedUser = _mapper.Map(dto, oldUser);
+            var role = (await _userManager.GetRolesAsync(oldUser)).FirstOrDefault();
 
-            updatedUser.Email = $"{dto.FullName.ToLower()}@devservice.az".Replace(" ", "_");    
-            updatedUser.UserName = dto.FullName.ToLower().Replace(" ", "_");
+            if (role is not null && !role.Equals(EUserRole.Admin.ToString()))
+                updatedUser.UserName = dto.FullName.ToLower().Replace(" ", ".");
 
-            if (dto.Password is not null)
+            if (dto.Image is null)
+            {
+                if (!string.IsNullOrWhiteSpace(updatedUser.ImageUrl))
+                    await _fileManagerService.RemoveFileAsync(updatedUser.ImageUrl);
+
+                updatedUser.ImageUrl = null;
+            }
+
+            EnsureIdentitySucceeded(await _userManager.UpdateAsync(updatedUser));
+
+            if (!string.IsNullOrWhiteSpace(dto.Role))
+            {
+                if (Enum.TryParse<EUserRole>(dto.Role, true, out var newRole))
+                {
+                    var currentRoles = await _userManager.GetRolesAsync(updatedUser);
+
+                    if (currentRoles.Any())
+                        EnsureIdentitySucceeded(await _userManager
+                            .RemoveFromRolesAsync(updatedUser, currentRoles));
+
+                    EnsureIdentitySucceeded(await _userManager.AddToRoleAsync(updatedUser, newRole.ToString()));
+                }
+                else
+                {
+                    var currentRoles = await _userManager.GetRolesAsync(updatedUser);
+                    if (currentRoles.Any())
+                        EnsureIdentitySucceeded(await _userManager
+                            .RemoveFromRolesAsync(updatedUser, currentRoles));
+
+                    EnsureIdentitySucceeded(await _userManager
+                        .AddToRoleAsync(updatedUser, EUserRole.User.ToString()));
+                }
+            }
+
+            return _mapper.Map<UserDTO>(updatedUser);
+        }
+
+        public async Task<UserDTO> UpdateAsync(string id, UpdateMainUserDTO dto)
+        {
+            var oldUser = await CheckUserNotFoundAsync(id);
+
+            if (dto.Image is not null)
+            {
+                if (!string.IsNullOrWhiteSpace(oldUser.ImageUrl))
+                    await _fileManagerService.RemoveFileAsync(oldUser.ImageUrl);
+            }
+
+            var updatedUser = _mapper.Map(dto, oldUser);
+            var role = (await _userManager.GetRolesAsync(oldUser)).FirstOrDefault();
+
+            if (role is not null && !role.Equals(EUserRole.Admin.ToString()))
+                updatedUser.UserName = dto.FullName.ToLower().Replace(" ", ".");
+
+            if (dto.Image is null)
+            {
+                if (!string.IsNullOrWhiteSpace(updatedUser.ImageUrl))
+                    await _fileManagerService.RemoveFileAsync(updatedUser.ImageUrl);
+
+                updatedUser.ImageUrl = null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Password))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(updatedUser);
-                EnsureIdentitySucceeded(await _userManager.
-                    ResetPasswordAsync(updatedUser, token, dto.Password));
+                EnsureIdentitySucceeded(await _userManager
+                    .ResetPasswordAsync(updatedUser, token, dto.Password));
             }
 
             EnsureIdentitySucceeded(await _userManager.UpdateAsync(updatedUser));
@@ -86,6 +191,7 @@ namespace App.Business.Services.InternalServices.Abstractions
             return _mapper.Map<UserDTO>(updatedUser);
         }
 
+        // Support methods
         private async Task<User> CheckUserNotFoundAsync(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -104,6 +210,5 @@ namespace App.Business.Services.InternalServices.Abstractions
                 throw new Exception($"{errors}");
             }
         }
-
     }
 }

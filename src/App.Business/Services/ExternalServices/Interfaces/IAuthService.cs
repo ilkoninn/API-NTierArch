@@ -1,4 +1,5 @@
-﻿using App.Business.DTOs.AuthDTOs;
+﻿using App.Core.DTOs.AuthDTOs;
+using App.Core.Entities.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace App.Business.Services.ExternalServices.Interfaces
 {
     public interface IAuthService
     {
-        Task LoginAsync(LoginDTO dto);
-        void LogoutAsync();
+        Task<LoginResponseDTO> LoginAsync(LoginDTO dto);
+        Task<User> CheckUserNotFoundAsync(string id);
     }
 }

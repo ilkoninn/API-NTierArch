@@ -26,13 +26,14 @@ namespace App.API
             {
                 opt.Events = new JwtBearerEvents
                 {
-                    OnMessageReceived = context =>
+                    OnAuthenticationFailed = context =>
                     {
-                        var accessToken = context.Request.Cookies["access_token"];
-                        if (!string.IsNullOrEmpty(accessToken))
-                        {
-                            context.Token = accessToken;
-                        }
+                        Console.WriteLine("Token failed to authenticate: " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("Token validated: " + context.SecurityToken);
                         return Task.CompletedTask;
                     }
                 };
@@ -42,9 +43,9 @@ namespace App.API
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
                     ValidateLifetime = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    ValidIssuer = configuration["JwtConfiguration:Issuer"],
+                    ValidAudience = configuration["JwtConfiguration:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["JwtConfiguration:SecretKey"])),
                     LifetimeValidator = (notBefore, expires, tokenToValidate, tokenValidationParameters) =>
                     {
                         return expires != null && expires > DateTime.UtcNow;
@@ -57,31 +58,49 @@ namespace App.API
         {
             services.AddSwaggerGen(opt =>
             {
-                //opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                //{
-                //    In = ParameterLocation.Header,
-                //    Description = "Please enter token",
-                //    Name = "Authorization",
-                //    Type = SecuritySchemeType.Http,
-                //    BearerFormat = "JWT",
-                //    Scheme = "bearer"
-                //});
-                //opt.AddSecurityRequirement(new OpenApiSecurityRequirement
-                //{
-                //    {
-                //        new OpenApiSecurityScheme
-                //        {
-                //            Reference = new OpenApiReference
-                //            {
-                //                Type=ReferenceType.SecurityScheme,
-                //                Id="Bearer"
-                //            }
-                //        },
-                //        new string[]{}
-                //    }
-                //});
+                opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "bearer"
+                });
+                opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
 
                 opt.SchemaFilter<EnumSchemaFilter>();
+            });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp", builder =>
+                {
+                    builder.WithOrigins(
+                        "http://localhost:5173",           // Dev
+                        "http://localhost:5174",
+                        "https://pms.devitgroup.az",           // Production
+                        "https://www.pms.devitgroup.az",
+                        "https://apipms.devitgroup.az",         // Admin 
+                        "https://www.apipms.devitgroup.az"
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+                });
             });
         }
 

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace App.Business.DTOs.Commons
+namespace App.Core.DTOs.Commons
 {
-    public interface IAuditedEntityDTO
+    public interface IAuditedImageEntityDTO
     {
-        public IFormFile File { get; set; }
+        public IFormFile Image { get; set; }
     }
 }
